@@ -14,7 +14,7 @@
   },
   "type": "module",
   "bin": {
-    "benchwright": "./bin/benchwright.mjs"
+    "benchwright": "bin/benchwright.mjs"
   },
   "main": "./index.mjs",
   "types": "./index.d.ts",
