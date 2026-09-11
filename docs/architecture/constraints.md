@@ -20,10 +20,13 @@ What a change must not break. Each of these is a promise a consumer's cases rely
 ## Contracts a consumer depends on
 
 - **The case format** (`prompt`, `graders`, `runs`, `tags`, `with_only`, `autopilot`, `fixture.*`) and the grader types with their fields. It is deliberately shaped like Claude Code's native plugin eval format; extensions must keep it that way.
-- **The config discovery order** and the config shape (`title`, `defaults`, `categories`, `subjects` | `skills`, `root`, `resultsDir`), including what a `subjects()` function receives.
-- **The normalized subject shape** handed to `install(workdir, ctx)`, and the meaning of the array it may return.
-- **The result files.** `result.jsonl` records (`meta`, `trigger`, `case`, `end`) and their keys; `result.json` shape; records from before the `subject` field still resolve through `skill`.
-- **Environment variables:** `BENCHWRIGHT_CLAUDE`, `BENCHWRIGHT_SHELL`, `BENCHWRIGHT_CONFIG`, `BENCHWRIGHT_CALL_LOG`.
+- **The config discovery order** and the config shape (`title`, `defaults` — including `defaults.harness`, default `claude`, and `defaults.model` / `judgeModel`, default `null` = the harness's own — `categories`, `subjects` | `skills`, `root`, `resultsDir`), including what a `subjects()` function receives.
+- **The normalized subject shape** handed to `install(workdir, ctx)` — `ctx` carries `subject`, `testCase`, `arm`, `variant` and the `harness` adapter — and the meaning of the array it may return.
+- **The result files.** `result.jsonl` records (`meta` — with `harness` — `trigger`, `case`, `end`) and their keys; `result.json` shape, including `harness` and `totals.costReported`; records from before the `subject` field still resolve through `skill`, records from before `costReported` read as reported.
+- **The canonical event contract** every adapter produces and every grader consumes: `{ type: 'text', text }`, `{ type: 'tool', name, input }` with the canonical names `Bash` (`command`), `Write` / `Edit` / `Read` (`file_path`), `Skill` (`skill`), `mcp__<server>__<tool>` (the arguments), and `{ type: 'result', text, costUsd }` with `costUsd: null` when the CLI reports no money. A case's `tool_used` grader is written against these names, never against a CLI's own.
+- **The harness adapter shape** (`lib/harness/index.mjs` header, `Harness` in `index.d.ts`): `--harness` accepts exactly `HARNESSES`; `getHarness` throws on anything else.
+- **Where the judge and the classifier run:** an empty directory, never the consumer's project or the workspace.
+- **Environment variables:** `BENCHWRIGHT_CLAUDE`, `BENCHWRIGHT_OPENCODE`, `BENCHWRIGHT_CODEX` (the binary of each harness — an executable, or a `.cmd` shim the runner resolves), `BENCHWRIGHT_OPENCODE_CONFIG_DIR` (the config directory an OpenCode run sees instead of an empty one), `BENCHWRIGHT_SHELL`, `BENCHWRIGHT_CONFIG`, `BENCHWRIGHT_CALL_LOG`, and `BENCHWRIGHT_LIVE=1` for the paid live suite.
 - **Grader semantics that flip verdicts:** `output_matches` sees the transcript without tool inputs; `command` output is trailing-trimmed; `**` spans one or more segments; default flags `m` (files, commands) and `im` (transcript); `with_only` graders never score.
 
 Changing any of these is an [api-change](../change-scenarios/api-change.md), not a refactor.

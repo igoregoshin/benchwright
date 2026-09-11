@@ -2,7 +2,7 @@
 
 ## When to apply
 
-Bumping `js-yaml`, raising the Node floor in `engines`, adding a runtime dependency, or adapting to a new Claude Code CLI release (`claude -p` flags, stream-json shape, settings sources).
+Bumping `js-yaml`, raising the Node floor in `engines`, adding a runtime dependency, or adapting to a new release of one of the agent CLIs (flags, output shape, settings sources) — that change lives in the CLI's adapter under `lib/harness/` and follows [new-harness](new-harness.md).
 
 ## Read first
 

@@ -7,6 +7,7 @@ Lightweight Markdown ADRs. One file per decision that shaped the runner and that
 | [0001](0001-subjects-not-skills.md) | The runner measures *subjects*, not skills |
 | [0002](0002-judge-sees-tool-calls-transcript-does-not.md) | The judge sees tool calls and autopilot; the transcript does not carry tool inputs |
 | [0003](0003-result-stream-is-the-source-of-truth.md) | `result.jsonl` is the source of truth; every other output is derived |
+| [0004](0004-harness-adapters.md) | One adapter module per agent CLI, one canonical event contract |
 
 ## Adding an ADR
 

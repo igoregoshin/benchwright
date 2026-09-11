@@ -26,7 +26,9 @@ One file per module, named after it: `test/<module>.test.mjs` for `lib/<module>.
 | Mocks | HTTP: matching, sequencing, `501` on unmatched, logging; MCP: handshake, schemas, `when` selection, error results, `writesFileFromArg`; `calls.mjs` selectors and exit codes. |
 | CLI | Exit codes for every user mistake, `--check` on good and bad configs, `--list`, `--build-only` producing a gradable workspace, `--grade-only` failing then passing, fail-fast on a missing agent binary. |
 
-The agent module (`lib/agent.mjs`) is exercised only by a paid run; its pure helpers (`renderTranscript`, `summarizeInput`) are the parts worth unit tests when they change.
+| Harness adapters | `test/harness.test.mjs`: every adapter's `parseEvents` on a trimmed real sample of its CLI's output (`test/fixtures/harness/<name>/case.jsonl` — paths and ids replaced by placeholders; keep them real, never hand-written), the flags `caseCommand` / `promptCommand` emit, `writeMcpConfig` parsed back, the registry, the model-default precedence, the `.cmd` shim resolver, and `runCase` plumbing through a fake adapter whose "CLI" is Node echoing stdin. |
+
+The agent module's spawn path is otherwise exercised only by a paid run. `npm run test:live` (`test/live/*.live.test.mjs`) is that run: skipped unless `BENCHWRIGHT_LIVE=1`, one tiny case per installed harness through the real `runCase`, asserting the file, a canonical tool event and a transcript. Run it after touching an adapter; it is never part of `npm test` or CI.
 
 ## Writing a test
 

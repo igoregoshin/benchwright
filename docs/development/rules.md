@@ -20,7 +20,7 @@ Hard requirements. Short on purpose; the reasoning behind each lives in [`../arc
 ## Tests
 
 - Every module in `lib/` and `mocks/` has a test file; a new behaviour comes with a test that fails without it. Details in [`testing.md`](testing.md).
-- Tests never call the agent CLI and never cost money. `BENCHWRIGHT_CLAUDE` is pointed at a non-existent binary in CLI tests on purpose.
+- Tests never call an agent CLI and never cost money. `BENCHWRIGHT_CLAUDE`, `BENCHWRIGHT_OPENCODE` and `BENCHWRIGHT_CODEX` are pointed at a non-existent binary in CLI tests on purpose; the paid live suite is opt-in (`BENCHWRIGHT_LIVE=1 npm run test:live`).
 - Every test that writes to disk uses `fs.mkdtempSync` and removes what it created.
 
 ## Commits

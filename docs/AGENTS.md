@@ -9,6 +9,7 @@ Documentation navigation for AI agents: "task → files to read". General rules 
 | New feature / new CLI flag | [`change-scenarios/new-feature.md`](change-scenarios/new-feature.md) + [`architecture/overview.md`](architecture/overview.md) |
 | New grader type | [`change-scenarios/new-grader.md`](change-scenarios/new-grader.md) + [`architecture/layers.md`](architecture/layers.md) |
 | New fixture category | [`change-scenarios/new-category.md`](change-scenarios/new-category.md) + [`architecture/layers.md`](architecture/layers.md) |
+| New agent CLI (harness adapter) or a CLI changed its flags / output | [`change-scenarios/new-harness.md`](change-scenarios/new-harness.md) + [`adr/0004-harness-adapters.md`](adr/0004-harness-adapters.md) |
 | Bugfix | [`change-scenarios/bugfix.md`](change-scenarios/bugfix.md) + the module named in the report |
 | Refactor | [`change-scenarios/refactor.md`](change-scenarios/refactor.md) + [`architecture/layers.md`](architecture/layers.md) |
 | Public contract (config, case format, CLI, result files, API) | [`change-scenarios/api-change.md`](change-scenarios/api-change.md) + [`architecture/constraints.md`](architecture/constraints.md) |
