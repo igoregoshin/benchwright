@@ -5,6 +5,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { skillSubjects, skillDescription, readFrontmatter, installSkill } from '../lib/skills.mjs';
 import { ALL_LAYERS } from '../lib/subjects.mjs';
+import { getHarness } from '../lib/harness/index.mjs';
 
 function makeSkill(dir, name, { description = `${name} does things`, crlf = false, evals = true, extra = {} } = {}) {
   const skillDir = path.join(dir, name);
@@ -122,6 +123,23 @@ describe('skillSubjects', () => {
       assert.deepEqual(wrote, ['.claude/skills/']);
       assert.ok(fs.existsSync(path.join(workdir, '.claude', 'skills', 'alpha', 'SKILL.md')));
       assert.ok(!fs.existsSync(path.join(workdir, '.claude', 'skills', 'alpha', 'evals')));
+    } finally {
+      fs.rmSync(workdir, { recursive: true, force: true });
+    }
+  });
+
+  it('install follows the harness in the context, unless skillsRoot pins a directory', () => {
+    const workdir = fs.mkdtempSync(path.join(os.tmpdir(), 'benchwright-ws-'));
+    try {
+      const { subjects } = skillSubjects({ dir });
+      assert.deepEqual(subjects[0].install(workdir, { variant: null, harness: getHarness('codex') }), ['.agents/skills/']);
+      assert.ok(fs.existsSync(path.join(workdir, '.agents', 'skills', 'alpha', 'SKILL.md')));
+      assert.deepEqual(subjects[0].install(workdir, { variant: null, harness: getHarness('opencode') }), ['.opencode/skills/']);
+      assert.ok(fs.existsSync(path.join(workdir, '.opencode', 'skills', 'alpha', 'SKILL.md')));
+
+      const pinned = skillSubjects({ dir, skillsRoot: 'custom/skills' }).subjects[0];
+      assert.deepEqual(pinned.install(workdir, { variant: null, harness: getHarness('codex') }), ['custom/skills/']);
+      assert.ok(fs.existsSync(path.join(workdir, 'custom', 'skills', 'alpha', 'SKILL.md')));
     } finally {
       fs.rmSync(workdir, { recursive: true, force: true });
     }

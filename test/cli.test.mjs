@@ -9,7 +9,9 @@ import { fileURLToPath } from 'node:url';
 const BIN = fileURLToPath(new URL('../bin/benchwright.mjs', import.meta.url));
 
 function benchwright(args, cwd) {
-  const r = spawnSync(process.execPath, [BIN, ...args], { cwd, encoding: 'utf8', env: { ...process.env, BENCHWRIGHT_CONFIG: '' , BENCHWRIGHT_CLAUDE: 'definitely-not-a-binary-benchwright' } });
+  // Every harness binary points at nothing: a CLI test must never reach an agent.
+  const missing = 'definitely-not-a-binary-benchwright';
+  const r = spawnSync(process.execPath, [BIN, ...args], { cwd, encoding: 'utf8', env: { ...process.env, BENCHWRIGHT_CONFIG: '', BENCHWRIGHT_CLAUDE: missing, BENCHWRIGHT_OPENCODE: missing, BENCHWRIGHT_CODEX: missing } });
   return { code: r.status, out: r.stdout, err: r.stderr };
 }
 
@@ -108,7 +110,34 @@ describe('benchwright CLI', () => {
     const r = benchwright(['--subject', 'alpha', '--layer', 'trigger'], root);
     assert.equal(r.code, 2);
     assert.match(r.err, /agent CLI not available/);
+    assert.match(r.err, /BENCHWRIGHT_CLAUDE/);
     assert.ok(!fs.existsSync(path.join(root, 'bench-results')));
+  });
+
+  it('--harness selects the CLI: an unknown name exits 2 before anything, a known one is preflighted by its own variable', () => {
+    assert.match(benchwright(['--help'], root).out, /--harness <name>\s+Agent CLI to drive: claude \| opencode \| codex/);
+    const typo = benchwright(['--harness', 'nope', '--subject', 'alpha'], root);
+    assert.equal(typo.code, 2);
+    assert.match(typo.err, /unknown harness "nope" \(expected: claude, opencode, codex\)/);
+    const codex = benchwright(['--harness', 'codex', '--subject', 'alpha', '--layer', 'trigger'], root);
+    assert.equal(codex.code, 2);
+    assert.match(codex.err, /agent CLI not available/);
+    assert.match(codex.err, /Install Codex CLI or point BENCHWRIGHT_CODEX/);
+    assert.ok(!fs.existsSync(path.join(root, 'bench-results')));
+  });
+
+  it('--build-only follows the harness without needing its CLI', () => {
+    const out = path.join(root, 'ws-codex');
+    const built = benchwright(['--harness', 'codex', '--subject', 'alpha', '--build-only', '--out', out], root);
+    assert.equal(built.code, 0, built.err);
+    const workdir = path.join(out, 'alpha__adds-note');
+    assert.ok(fs.existsSync(path.join(workdir, '.agents', 'skills', 'alpha', 'SKILL.md')), 'skill installed where the harness reads it');
+    assert.ok(!fs.existsSync(path.join(workdir, '.claude')));
+    // The installed skill is invisible to git, so the diff the subject sees is only the change.
+    assert.match(fs.readFileSync(path.join(workdir, '.git', 'info', 'exclude'), 'utf8'), /^\.agents\/$/m);
+    const graded = benchwright(['--harness', 'codex', '--subject', 'alpha', '--case', 'adds-note', '--grade-only', workdir], root);
+    assert.equal(graded.code, 1);
+    assert.match(graded.out, /rule graders: 1\/2 pass/);
   });
 
   it('--build-only builds the with-arm workspace and --grade-only grades a directory', () => {

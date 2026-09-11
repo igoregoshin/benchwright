@@ -1,6 +1,6 @@
 {
   "name": "benchwright",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Benchmark anything an agent loads — skills, rules, prompts, MCP wiring — through headless agent-CLI runs: trigger / functional / ablation layers, deterministic graders, mock services, resumable reports.",
   "author": "Igor Egoshin",
   "license": "MIT",
@@ -27,7 +27,8 @@
     "./mocks/*": "./mocks/*"
   },
   "scripts": {
-    "test": "node --test test/*.test.mjs"
+    "test": "node --test test/*.test.mjs",
+    "test:live": "node --test test/live/*.live.test.mjs"
   },
   "files": [
     "bin/",
@@ -44,7 +45,9 @@
     "skills",
     "ablation",
     "claude-code",
-    "agent-skills"
+    "agent-skills",
+    "opencode",
+    "codex"
   ],
   "dependencies": {
     "js-yaml": "^4.1.0"

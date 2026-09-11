@@ -52,7 +52,7 @@ describe('openRun / readRecords', () => {
 describe('assemble', () => {
   it('trigger: majority vote per query, ties count as not triggered and unstable', () => {
     const records = [
-      { kind: 'meta', title: 'T', startedAt: '2026-01-01T00:00:00.000Z', layers: ['trigger'], subjects: ['s'], model: 'm', judgeModel: 'j' },
+      { kind: 'meta', title: 'T', startedAt: '2026-01-01T00:00:00.000Z', layers: ['trigger'], subjects: ['s'], harness: 'codex', model: 'm', judgeModel: 'j' },
       trigger({ queryId: 'q1', run: 0, actual: true }),
       trigger({ queryId: 'q1', run: 1, actual: true }),
       trigger({ queryId: 'q1', run: 2, actual: false }),
@@ -62,6 +62,7 @@ describe('assemble', () => {
     ];
     const r = assemble(records);
     assert.equal(r.title, 'T');
+    assert.equal(r.harness, 'codex');
     assert.deepEqual(r.subjects, ['s']);
     const t = r.trigger[0];
     assert.equal(t.subject, 's');
@@ -72,6 +73,21 @@ describe('assemble', () => {
     assert.equal(t.misses.length, 0);
     assert.equal(t.calls, 6);
     assert.equal(r.totals.triggerCalls, 6);
+  });
+
+  it('a harness that reports no money is never printed as $0: costReported is false and the HTML says so', () => {
+    const none = assemble([{ kind: 'meta', startedAt: '2026-01-01T00:00:00.000Z', layers: ['functional'], subjects: ['s'], harness: 'codex' }, caseRec({ costUsd: null })]);
+    assert.equal(none.totals.costReported, false);
+    assert.equal(none.totals.costUsd, 0);
+    assert.match(renderHtml(none), /harness <code>codex<\/code>/);
+    assert.match(renderHtml(none), /not reported by the harness/);
+    assert.match(renderHtml(none), /model <code>harness default<\/code>/);
+
+    const some = assemble([{ kind: 'meta', startedAt: '2026-01-01T00:00:00.000Z', layers: ['functional'], subjects: ['s'] }, caseRec({ costUsd: 0.5 })]);
+    assert.equal(some.totals.costReported, true);
+    assert.equal(some.totals.costUsd, 0.5);
+    // Records from before this field carry a number and keep reading as reported.
+    assert.equal(assemble([caseRec({ costUsd: 0 })]).totals.costReported, true);
   });
 
   it('functional and ablation group per subject with deletion candidates, and legacy `skill` records still count', () => {

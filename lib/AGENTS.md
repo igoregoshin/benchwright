@@ -16,8 +16,9 @@ The runner: everything between "a subject is selected" and "a record is on disk"
 ## Boundaries
 
 - Only `agent.mjs` spawns the agent CLI. Prompt templates for the judge and the classifier live there and nowhere else.
+- Only `harness/<name>.mjs` knows a CLI: its flags, its output format, its skills directory, its mock-config file, its isolation quirks. `agent.mjs`, `fixtures.mjs` and `skills.mjs` ask the adapter; graders and the runner see canonical events (`Bash` / `Write` / `Edit` / `Read` / `Skill` / `mcp__<server>__<tool>`). Adding a CLI is one adapter file, a fixture sample under `test/fixtures/harness/`, a row in the README table — nothing else changes ([ADR-0004](../docs/adr/0004-harness-adapters.md)).
 - `runner.mjs` never reads workspace files; it goes through `fixtures.snapshot()` and the graders.
-- `report.mjs` and `agent.mjs` import nothing from the package. Keep it that way — consumers script against them directly.
+- `report.mjs` imports nothing from the package and `agent.mjs` imports only `harness/`. Keep it that way — consumers script against them directly.
 - The word "skill" is allowed in `skills.mjs` only. Every other module sees a normalized *subject*.
 - Do not put tool inputs into the transcript. `output_matches` reads it; the judge gets `toolCalls` separately (ADR-0002).
 - A default that can flip a verdict (a regex flag, a trim, an exclude, a prompt wording) is a contract: test + README before changing it.

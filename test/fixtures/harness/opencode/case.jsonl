@@ -1,0 +1,25 @@
+{"type":"step_start","sessionID":"<session>","part":{"id":"<part>","type":"step-start"}}
+{"type":"tool_use","sessionID":"<session>","part":{"type":"tool","tool":"bash","callID":"<call>","state":{"status":"completed","input":{"command":"git status --short","description":"Show git status short format"},"output":"?? err.txt\n?? out.jsonl\n"},"id":"<part>","messageID":"<message>"}}
+{"type":"tool_use","sessionID":"<session>","part":{"type":"tool","tool":"read","callID":"<call>","state":{"status":"completed","input":{"filePath":"<workspace>\\README.md"},"output":"<path><workspace>\\README.md</path>…[trimmed]"},"id":"<part>","messageID":"<message>"}}
+{"type":"step_finish","sessionID":"<session>","part":{"id":"<part>","reason":"tool-calls","type":"step-finish","tokens":{"total":18380,"input":16365,"output":223,"reasoning":0,"cache":{"write":0,"read":1792}},"cost":0}}
+{"type":"step_start","sessionID":"<session>","part":{"id":"<part>","type":"step-start"}}
+{"type":"tool_use","sessionID":"<session>","part":{"type":"tool","tool":"edit","callID":"<call>","state":{"status":"completed","input":{"filePath":"<workspace>\\README.md","oldString":"base","newString":"base\ndone"},"output":"Edit applied successfully."},"id":"<part>","messageID":"<message>"}}
+{"type":"step_finish","sessionID":"<session>","part":{"id":"<part>","reason":"tool-calls","type":"step-finish","tokens":{"total":18662,"input":393,"output":157,"reasoning":0,"cache":{"write":0,"read":18112}},"cost":0}}
+{"type":"step_start","sessionID":"<session>","part":{"id":"<part>","type":"step-start"}}
+{"type":"text","sessionID":"<session>","part":{"id":"<part>","messageID":"<message>","type":"text","text":"Git status printed:\n\n```\n?? err.txt\n?? out.jsonl\n```\n\nTwo untracked files: `err.txt` and `out.jsonl`."}}
+{"type":"step_finish","sessionID":"<session>","part":{"id":"<part>","reason":"stop","type":"step-finish","tokens":{"total":18726,"input":181,"output":49,"reasoning":0,"cache":{"write":0,"read":18496}},"cost":0}}
+{"type":"step_start","sessionID":"<session>","part":{"id":"<part>","type":"step-start"}}
+{"type":"tool_use","sessionID":"<session>","part":{"type":"tool","tool":"skill","callID":"<call>","state":{"status":"completed","input":{"name":"bench-marker"},"output":"<skill_content name=\"bench-marker\">\n# Skill: bench-marker\n\n# bench-marker\n\nWhen invoked, create a file named MARKER.txt whose only content is the word: verified…[trimmed]"},"id":"<part>","messageID":"<message>"}}
+{"type":"step_finish","sessionID":"<session>","part":{"id":"<part>","reason":"tool-calls","type":"step-finish","tokens":{"total":18292,"input":18252,"output":40,"reasoning":0,"cache":{"write":0,"read":0}},"cost":0}}
+{"type":"step_start","sessionID":"<session>","part":{"id":"<part>","type":"step-start"}}
+{"type":"tool_use","sessionID":"<session>","part":{"type":"tool","tool":"write","callID":"<call>","state":{"status":"completed","input":{"filePath":"<workspace>\\MARKER.txt","content":"verified"},"output":"Wrote file successfully."},"id":"<part>","messageID":"<message>"}}
+{"type":"step_finish","sessionID":"<session>","part":{"id":"<part>","reason":"tool-calls","type":"step-finish","tokens":{"total":18593,"input":225,"output":128,"reasoning":0,"cache":{"write":0,"read":18240}},"cost":0}}
+{"type":"step_start","sessionID":"<session>","part":{"id":"<part>","type":"step-start"}}
+{"type":"text","sessionID":"<session>","part":{"id":"<part>","messageID":"<message>","type":"text","text":"Done. Created `MARKER.txt` with content `verified`."}}
+{"type":"step_finish","sessionID":"<session>","part":{"id":"<part>","reason":"stop","type":"step-finish","tokens":{"total":18641,"input":177,"output":32,"reasoning":0,"cache":{"write":0,"read":18432}},"cost":0}}
+{"type":"step_start","sessionID":"<session>","part":{"id":"<part>","type":"step-start"}}
+{"type":"tool_use","sessionID":"<session>","part":{"type":"tool","tool":"bench_ping","callID":"<call>","state":{"status":"completed","input":{"value":"x"},"output":"{\n  \"pong\": true,\n  \"echo\": \"ok\"\n}"},"id":"<part>","messageID":"<message>"}}
+{"type":"step_finish","sessionID":"<session>","part":{"id":"<part>","reason":"tool-calls","type":"step-finish","tokens":{"total":18265,"input":16433,"output":40,"reasoning":0,"cache":{"write":0,"read":1792}},"cost":0}}
+{"type":"step_start","sessionID":"<session>","part":{"id":"<part>","type":"step-start"}}
+{"type":"text","sessionID":"<session>","part":{"id":"<part>","messageID":"<message>","type":"text","text":"The tool returned:\n\n```json\n{ \"pong\": true, \"echo\": \"ok\" }\n```"}}
+{"type":"step_finish","sessionID":"<session>","part":{"id":"<part>","reason":"stop","type":"step-finish","tokens":{"total":18332,"input":115,"output":41,"reasoning":0,"cache":{"write":0,"read":18176}},"cost":0}}

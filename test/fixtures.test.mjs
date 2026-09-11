@@ -6,6 +6,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { buildWorkspace, snapshot, HARNESS_PATHS } from '../lib/fixtures.mjs';
 import { DEFAULTS, normalizeCase } from '../lib/subjects.mjs';
+import { getHarness } from '../lib/harness/index.mjs';
 
 const gitRaw = (args, cwd) => execFileSync('git', args, { cwd, encoding: 'utf8' });
 const git = (args, cwd) => gitRaw(args, cwd).trim();
@@ -26,9 +27,54 @@ describe('buildWorkspace', () => {
     assert.equal(git(['status', '--porcelain'], workdir), '');
     assert.equal(git(['branch', '--show-current'], workdir), 'main');
     const exclude = fs.readFileSync(path.join(workdir, '.git', 'info', 'exclude'), 'utf8');
-    for (const p of HARNESS_PATHS) assert.ok(exclude.includes(p), `exclude lacks ${p}`);
+    // Only the current harness's paths (the default is Claude Code) plus the runner's own .bench/.
+    const expected = [...getHarness('claude').harnessPaths, '.bench/'];
+    for (const p of expected) assert.ok(exclude.includes(p), `exclude lacks ${p}`);
     assert.ok(exclude.includes(DEFAULTS.secretsFile));
-    assert.deepEqual(excludes, [...HARNESS_PATHS, DEFAULTS.secretsFile]);
+    assert.deepEqual(excludes, [...expected, DEFAULTS.secretsFile]);
+    for (const p of expected) assert.ok(HARNESS_PATHS.includes(p), `HARNESS_PATHS (the union) lacks ${p}`);
+    assert.ok(HARNESS_PATHS.includes('.codex/') && HARNESS_PATHS.includes('opencode.json'));
+  });
+
+  it('a harness picks its own excludes and reaches the install hook', () => {
+    let seen;
+    const install = (workdir, ctx) => {
+      seen = ctx.harness;
+    };
+    const workdir = fresh();
+    const { excludes } = buildWorkspace({ subject: subject('repo', install), testCase: testCase({}), workdir, arm: 'with', defaults: DEFAULTS, harness: 'codex' });
+    assert.equal(seen.name, 'codex');
+    assert.deepEqual(excludes, ['.codex/', '.agents/', '.bench/', DEFAULTS.secretsFile]);
+    // defaults.harness is the config's choice; an explicit argument wins over it.
+    const viaDefaults = buildWorkspace({ subject: subject('none'), testCase: testCase({}), workdir: fresh(), arm: 'without', defaults: { ...DEFAULTS, harness: 'opencode' } });
+    assert.deepEqual(viaDefaults.excludes, ['.opencode/', 'opencode.json', '.bench/', DEFAULTS.secretsFile]);
+  });
+
+  it('mcp category: the mock servers land in the file each harness reads, and that file is excluded', () => {
+    const mocksDir = path.join(base, 'mocks');
+    fs.mkdirSync(mocksDir, { recursive: true });
+    fs.writeFileSync(path.join(mocksDir, 'm.json'), JSON.stringify({ mcp: { bench: { ping: { result: { pong: true } } } } }));
+    const mcpSubject = { ...subject('mcp'), mocksDir };
+
+    const claude = fresh();
+    const c = buildWorkspace({ subject: mcpSubject, testCase: testCase({ mocks: 'm.json' }), workdir: claude, arm: 'without', defaults: DEFAULTS });
+    assert.ok(JSON.parse(fs.readFileSync(path.join(claude, '.mcp.json'), 'utf8')).mcpServers.bench.args.includes('bench'));
+    assert.equal(JSON.parse(fs.readFileSync(path.join(claude, '.claude', 'settings.json'), 'utf8')).enableAllProjectMcpServers, true);
+    assert.ok(c.excludes.includes('.mcp.json'));
+
+    const opencode = fresh();
+    const o = buildWorkspace({ subject: mcpSubject, testCase: testCase({ mocks: 'm.json' }), workdir: opencode, arm: 'without', defaults: DEFAULTS, harness: 'opencode' });
+    assert.equal(JSON.parse(fs.readFileSync(path.join(opencode, 'opencode.json'), 'utf8')).mcp.bench.type, 'local');
+    assert.ok(o.excludes.includes('opencode.json'));
+    assert.ok(!fs.existsSync(path.join(opencode, '.mcp.json')));
+
+    const codex = fresh();
+    const x = buildWorkspace({ subject: mcpSubject, testCase: testCase({ mocks: 'm.json' }), workdir: codex, arm: 'without', defaults: DEFAULTS, harness: 'codex' });
+    assert.match(fs.readFileSync(path.join(codex, '.codex', 'config.toml'), 'utf8'), /^\[mcp_servers\.bench\]$/m);
+    assert.ok(x.excludes.includes('.codex/'));
+    // The written config is invisible to git in every case.
+    assert.equal(git(['status', '--porcelain'], codex), '');
+    assert.deepEqual([...snapshot(codex, x.excludes).keys()], []);
   });
 
   it('diff: the change is staged by default, in the working tree with staged: false', () => {

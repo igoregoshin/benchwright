@@ -11,6 +11,7 @@ export { ALL_LAYERS, CATEGORIES, DEFAULTS, normalizeSubject, normalizeCase, vali
 export { skillSubjects, installSkill, skillDescription, readFrontmatter } from './lib/skills.mjs';
 export { buildWorkspace, snapshot, HARNESS_PATHS } from './lib/fixtures.mjs';
 export { gradeCase, matchPaths, KNOWN_GRADERS } from './lib/graders.mjs';
+export { HARNESSES, getHarness, resolveBinary } from './lib/harness/index.mjs';
 export { runCase, judge, classifyTrigger, checkAgentBinary, renderTranscript, summarizeInput, CLAUDE } from './lib/agent.mjs';
-export { runTriggerLayer, runFunctionalLayer, runOneArm, autopilotPrompt, mapLimit } from './lib/runner.mjs';
+export { runTriggerLayer, runFunctionalLayer, runOneArm, resolveModels, autopilotPrompt, mapLimit } from './lib/runner.mjs';
 export { openRun, readRecords, assemble, keyOf, reading, renderHtml, writeJson, writeHtml, RELIABLE_RUNS, pct } from './lib/report.mjs';

@@ -67,7 +67,9 @@ describe('loadConfig + resolveSubjects + check', () => {
     assert.equal(config.root, root);
     assert.equal(config.title, 'T');
     assert.equal(config.defaults.runs, 3);
-    assert.equal(config.defaults.model, 'sonnet');
+    // No model in DEFAULTS: the harness supplies its own unless the config says otherwise.
+    assert.equal(config.defaults.model, null);
+    assert.equal(config.defaults.harness, 'claude');
     assert.equal(config.resultsDir, path.join(root, 'bench-results'));
     const { subjects, problems } = await resolveSubjects(config);
     assert.deepEqual(problems, []);
