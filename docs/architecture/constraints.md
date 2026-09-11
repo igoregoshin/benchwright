@@ -1,0 +1,33 @@
+# Constraints
+
+What a change must not break. Each of these is a promise a consumer's cases rely on.
+
+## Non-functional
+
+- **A run must survive being killed.** Every finished unit of work is on disk before the next one starts, and `--resume` continues at the granularity of one model call. A change that buffers records, or derives a file that cannot be rebuilt from `result.jsonl`, breaks this.
+- **Nothing is paid for that a check could have caught.** Config problems, unknown `--case` ids, malformed graders and a missing agent binary all fail before the first workspace is built. New validation belongs in `validateSubject` / `check()`, not in a run.
+- **Nothing reaches the network except the agent CLI.** Mocks bind `127.0.0.1`; fixtures rewrite pushes into a local bare repo; HTTP mock secrets are also removed from the runner's environment so a real token can never win over a fixture.
+- **The mocks are deterministic and never invent.** An unrecorded request is an explicit error (HTTP `501`, MCP `isError`), never an empty success.
+- **A number below three runs is labelled as not a measurement** everywhere it is shown. The label is part of the output contract.
+
+## Technological
+
+- Node ≥ 20.11, ESM only, no build step: the package ships exactly the files in the repository.
+- LF line endings in the working copy (`.gitattributes`): `npm publish` ships the working copy and the bin carries a shebang.
+- Windows is a first-class platform: paths go through `path`, temp dirs through `os.tmpdir()` (which returns 8.3 short names — convert `import.meta.url` with `fileURLToPath`, never by string surgery), `command` graders run under bash when one exists.
+- One YAML parser (`js-yaml`), no test framework beyond `node:test`.
+
+## Contracts a consumer depends on
+
+- **The case format** (`prompt`, `graders`, `runs`, `tags`, `with_only`, `autopilot`, `fixture.*`) and the grader types with their fields. It is deliberately shaped like Claude Code's native plugin eval format; extensions must keep it that way.
+- **The config discovery order** and the config shape (`title`, `defaults`, `categories`, `subjects` | `skills`, `root`, `resultsDir`), including what a `subjects()` function receives.
+- **The normalized subject shape** handed to `install(workdir, ctx)`, and the meaning of the array it may return.
+- **The result files.** `result.jsonl` records (`meta`, `trigger`, `case`, `end`) and their keys; `result.json` shape; records from before the `subject` field still resolve through `skill`.
+- **Environment variables:** `BENCHWRIGHT_CLAUDE`, `BENCHWRIGHT_SHELL`, `BENCHWRIGHT_CONFIG`, `BENCHWRIGHT_CALL_LOG`.
+- **Grader semantics that flip verdicts:** `output_matches` sees the transcript without tool inputs; `command` output is trailing-trimmed; `**` spans one or more segments; default flags `m` (files, commands) and `im` (transcript); `with_only` graders never score.
+
+Changing any of these is an [api-change](../change-scenarios/api-change.md), not a refactor.
+
+## Vendor neutrality
+
+The package carries no company, product or client name and no project-specific convention; `test/sources.test.mjs` enforces the known ones. Conventions of a particular consumer (template rendering, shared reference files, where its secrets file lives) are expressed through the config hooks — `describe`, `install`, `filter`, `defaults.secretsFile` — on the consumer's side.

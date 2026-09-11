@@ -4,6 +4,8 @@ Benchmark what you hand an agent — a skill, a rules file, a prompt fragment, a
 
 `npm test` proves the *text* of a skill survived an edit. benchwright proves the *behaviour* did: does the agent produce the right artifact, is it routed to for the right requests, and does the text earn its tokens over the base model.
 
+**Tech stack:** plain ESM JavaScript, Node ≥ 20.11, no build step, one runtime dependency (`js-yaml`), tests on `node:test`. Requires the Claude Code CLI on `PATH` and `git`.
+
 ```bash
 npx benchwright --list                                              # what is registered, with case ids
 npx benchwright --check                                             # free: validate config and every case
@@ -327,6 +329,23 @@ Other flags: `--case <id>` (repeatable; ids are printed by `--list`, trigger que
 ## Programmatic use
 
 Everything the CLI does is exported from `benchwright`: `loadConfig`, `resolveSubjects`, `check`, `skillSubjects`, `installSkill`, `buildWorkspace`, `snapshot`, `gradeCase`, `runCase`, `judge`, `classifyTrigger`, `runTriggerLayer`, `runFunctionalLayer`, `openRun`, `assemble`, `renderHtml`, plus the constants `CATEGORIES`, `ALL_LAYERS`, `KNOWN_GRADERS`, `RELIABLE_RUNS`. Types ship in `index.d.ts`.
+
+## Documentation
+
+This README is the user reference. How the code is organised and how to change it safely lives in `docs/`:
+
+| Section | What is inside |
+|---|---|
+| [Architecture](docs/architecture/overview.md) | The pipeline, its layers, dependencies, the contracts a change must not break |
+| [Development](docs/development/rules.md) | Hard rules, tests, review checklist, releases |
+| [Change scenarios](docs/change-scenarios/) | Playbooks: new grader, new category, bugfix, contract change, … |
+| [ADR](docs/adr/README.md) | The decisions behind the runner and the alternatives rejected |
+| [Glossary](docs/glossary.md) | Subject, arm, layer, thin sample, harness fault, … |
+| [Navigation for AI agents](docs/AGENTS.md) | Task → files to read |
+
+## License
+
+[MIT](LICENSE).
 
 ## Relation to `claude plugin eval`
 
