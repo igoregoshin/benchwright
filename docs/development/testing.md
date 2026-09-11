@@ -13,7 +13,7 @@ The suite needs `git` and, on Windows, Git Bash (command graders). It never need
 
 ## Where tests live
 
-One file per module, named after it: `test/<module>.test.mjs` for `lib/<module>.mjs`; `test/mocks.test.mjs` covers all three mock scripts; `test/cli.test.mjs` drives the real binary through `spawnSync`. `test/sources.test.mjs` holds repository-wide invariants (no NUL bytes, no vendor names).
+One file per module, named after it: `test/<module>.test.mjs` for `lib/<module>.mjs`; `test/mocks.test.mjs` covers all three mock scripts; `test/cli.test.mjs` drives the real binary through `spawnSync`. `test/sources.test.mjs` holds repository-wide invariants (no NUL bytes, no vendor names). `test/examples.test.mjs` keeps `examples/` honest: every example config passes `--check`, `--build-only` produces the workspace its comments describe, the dry-run script's graders fail before the work and pass after, and `examples/sample-run/console.txt` matches what the report code generates today.
 
 ## What is tested, by layer
 

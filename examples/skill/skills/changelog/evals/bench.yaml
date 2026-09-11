@@ -1,0 +1,141 @@
+# Functional cases for the `changelog` skill.
+#
+# `skill:` must match the directory name; `category:` says what the fixture
+# builder prepares before the agent starts — here a git repository.
+# Trigger queries live next door in trigger-eval.json (a `trigger:` list here
+# works too).
+skill: changelog
+category: repo
+
+cases:
+  # Case 1 — the file does not exist yet. The graders check, in order: the file
+  # appeared, it has the right heading, it lists the feature and the fix, it
+  # does NOT list the chore, and the skill did not commit.
+  - id: unreleased-from-commits
+    prompt: update the changelog
+    tags: [core]
+    runs: 3                       # overrides defaults.runs for this case
+    fixture:
+      files:                      # the committed baseline
+        - path: package.json
+          content: |
+            { "name": "uploader", "version": "1.1.0" }
+        - path: src/upload.js
+          content: |
+            export async function upload(file) {
+              return send(file);
+            }
+      commits:                    # extra commits on top of the baseline, in order
+        - message: "feat: retry a failed upload three times"
+          files:
+            - path: src/upload.js
+              content: |
+                export async function upload(file, attempts = 3) {
+                  for (let i = 0; i < attempts; i += 1) {
+                    try { return await send(file); } catch (err) { if (i === attempts - 1) throw err; }
+                  }
+                }
+        - message: "fix: close the connection on timeout"
+          files:
+            - path: src/connection.js
+              content: |
+                export function onTimeout(conn) { conn.close(); }
+        - message: "chore: bump dependencies"
+          files:
+            - path: package.json
+              content: |
+                { "name": "uploader", "version": "1.1.0", "devDependencies": { "linter": "^9.0.0" } }
+    graders:
+      - type: file_exists
+        path: CHANGELOG.md
+      - type: file_matches
+        path: CHANGELOG.md
+        pattern: '^## \[Unreleased\]'          # the `m` flag is the default, so ^ is a line start
+      - type: file_matches
+        path: CHANGELOG.md
+        pattern: '^### Added'
+      - type: file_matches
+        path: CHANGELOG.md
+        pattern: 'retr(y|ies)'
+        flags: im
+      # A rule can only assert presence; absence goes through a command.
+      # `grep -c` prints 0 and exits 1 when nothing matches — with `expect_match`
+      # the output is compared even on a non-zero exit, so this reads naturally.
+      - type: command
+        run: grep -c 'bump' CHANGELOG.md
+        expect_match: '^0$'
+      # baseline + 3 fixture commits = 4. One more means the skill committed.
+      - type: command
+        run: git rev-list --count HEAD
+        expect_match: '^4$'
+      # Only the judge can decide wording. It sees the prompt, the transcript,
+      # the tool calls and every file after the run.
+      - type: llm
+        criterion: >-
+          Every bullet under Unreleased describes one commit from the history in the
+          imperative mood and carries no "feat:" / "fix:" prefix.
+      # "The skill actually loaded" — reported, but excluded from the score, so
+      # it can never make an ablation look like a win by itself.
+      - type: tool_used
+        tool: Skill
+        skill: changelog
+        with_only: true
+
+  # Case 2 — a changelog with a released section already exists. The point of
+  # this case is what must NOT change: the [1.1.0] section stays, and
+  # Unreleased is inserted above it, not below.
+  - id: keeps-released-sections
+    prompt: add what is new to the changelog
+    tags: [core]
+    fixture:
+      files:
+        - path: CHANGELOG.md
+          content: |
+            # Changelog
+
+            All notable changes to this project will be documented in this file.
+
+            ## [1.1.0] - 2026-08-20
+
+            ### Added
+
+            - Upload files in chunks
+        - path: src/upload.js
+          content: |
+            export async function upload(file) { return send(file); }
+      commits:
+        - message: "fix: reject an empty file before sending it"
+          files:
+            - path: src/upload.js
+              content: |
+                export async function upload(file) {
+                  if (!file.size) throw new Error('empty file');
+                  return send(file);
+                }
+        - message: "docs: describe the chunk size"
+          files:
+            - path: README.md
+              content: "# uploader\n\nChunks are 4 MB.\n"
+    graders:
+      - type: file_matches
+        path: CHANGELOG.md
+        pattern: '^## \[1\.1\.0\] - 2026-08-20'
+      - type: file_matches
+        path: CHANGELOG.md
+        pattern: '^### Fixed'
+      # The first `## ` heading in the file must be Unreleased.
+      - type: command
+        run: grep -m1 '^## ' CHANGELOG.md
+        expect_match: 'Unreleased'
+      - type: command
+        run: grep -c 'chunk size' CHANGELOG.md
+        expect_match: '^0$'
+      - type: command
+        run: git rev-list --count HEAD
+        expect_match: '^3$'
+      - type: llm
+        criterion: The bullet about the empty file is under Unreleased, and the 1.1.0 section is unchanged.
+      - type: tool_used
+        tool: Skill
+        skill: changelog
+        with_only: true

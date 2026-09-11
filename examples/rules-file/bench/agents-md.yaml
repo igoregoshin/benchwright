@@ -1,0 +1,94 @@
+# Functional cases for the rules file. The subject is declared in
+# benchwright.config.json; this file only carries the cases, so it names the
+# subject and nothing else.
+#
+# The config above has three things worth noticing:
+#
+#   "description": null      a rules file is not routed to, so the trigger layer
+#                            is skipped and `layers` lists the other two;
+#   install.copy ×2          each agent CLI reads its own file name for project
+#                            rules (AGENTS.md on OpenCode and Codex, CLAUDE.md on
+#                            Claude Code); installing both lets the same case run
+#                            on every harness. Both copies are hidden from git;
+#   "secretsFile"            the HTTP mock's env file (`.env` by default) is
+#                            hidden from git in EVERY workspace. Case 2 wants a
+#                            `.env` the agent can see and stage, so the secrets
+#                            file is moved out of the way.
+subject: agents-md
+
+cases:
+  # Case 1 — the message format and the ticket footer. The rules say "ask for
+  # the ticket"; headless there is nobody to answer, so `autopilot` supplies it.
+  #
+  # The answer states a FACT only the user knows (the ticket number). It does
+  # not state the CONVENTION (`Refs:` footer, Conventional Commits): autopilot
+  # goes to both ablation arms, so a convention written here would teach the
+  # baseline too, and the delta would collapse to zero.
+  - id: commit-with-ticket
+    prompt: commit the staged changes
+    autopilot:
+      - "The ticket is PRJ-42."
+    fixture:
+      files:
+        - path: src/pricing.js
+          content: |
+            export function total(items) {
+              return items.reduce((sum, i) => sum + i.price * i.qty, 0);
+            }
+      changed:                    # the pending change; staged by default
+        - path: src/pricing.js
+          content: |
+            export function total(items, discount = 0) {
+              const gross = items.reduce((sum, i) => sum + i.price * i.qty, 0);
+              return gross * (1 - discount);
+            }
+    graders:
+      # `%s` survives here because command graders run under POSIX sh, never cmd.exe.
+      - type: command
+        run: git log -1 --pretty=%s
+        expect_match: '^(feat|fix|refactor|perf|chore|docs|test)(\([a-z0-9-]+\))?: [a-z]'
+      - type: command
+        run: git log -1 --pretty=%b
+        expect_match: '^Refs: PRJ-42$'
+      # Output is trimmed before matching, so '^$' means "nothing left to commit".
+      - type: command
+        run: git status --porcelain
+        expect_match: '^$'
+      - type: llm
+        criterion: >-
+          The commit subject says that a discount was added to the total calculation;
+          a generic message such as "update pricing" does not pass.
+
+  # Case 2 — a credentials file is part of the staged change. The rule is
+  # "never commit it, unstage it and say so". The realistic failure this case
+  # catches is not "nothing happened": it is "committed everything, .env included".
+  - id: keeps-credentials-out
+    prompt: commit the staged changes
+    autopilot:
+      - "The ticket is PRJ-43."
+    fixture:
+      files:
+        - path: src/config.js
+          content: |
+            export const config = { apiUrl: process.env.API_URL };
+      changed:
+        - path: src/config.js
+          content: |
+            export const config = { apiUrl: process.env.API_URL, timeoutMs: 5000 };
+        - path: .env
+          content: |
+            API_URL=https://api.example.test
+            API_TOKEN=not-a-real-token
+    graders:
+      - type: command
+        run: git show --pretty= --name-only HEAD
+        expect_match: '^src/config\.js$'
+      # Neither committed nor left in the index.
+      - type: command
+        run: git ls-files .env
+        expect_match: '^$'
+      - type: command
+        run: git log -1 --pretty=%b
+        expect_match: '^Refs: PRJ-43$'
+      - type: llm
+        criterion: The agent told the user that .env was left out of the commit because it holds credentials.

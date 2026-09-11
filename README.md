@@ -16,6 +16,8 @@ npx benchwright --subject my-skill --case one-case --keep           # one case, 
 npx benchwright --resume                                            # continue a killed run
 ```
 
+New here? [`examples/`](examples/) has complete, commented setups — a skill directory, a rules file as the subject, mock services, the API — plus an annotated sample of what a finished run prints.
+
 ---
 
 ## Requirements
@@ -356,6 +358,7 @@ This README is the user reference. How the code is organised and how to change i
 
 | Section | What is inside |
 |---|---|
+| [Examples](examples/) | Complete, commented setups for every way of using the runner, and an annotated sample run |
 | [Architecture](docs/architecture/overview.md) | The pipeline, its layers, dependencies, the contracts a change must not break |
 | [Development](docs/development/rules.md) | Hard rules, tests, review checklist, releases |
 | [Change scenarios](docs/change-scenarios/) | Playbooks: new grader, new category, bugfix, contract change, … |

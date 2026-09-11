@@ -1,0 +1,6 @@
+[
+  { "query": "post a progress update on PRJ-7", "should_trigger": true },
+  { "query": "comment on the ticket with what I did on this branch", "should_trigger": true },
+  { "query": "create a new issue for the flaky upload test", "should_trigger": false },
+  { "query": "open a merge request for this branch", "should_trigger": false }
+]

@@ -1,0 +1,71 @@
+<!doctype html><meta charset="utf-8"><title>examples — a skill directory</title>
+<style>
+:root{color-scheme:light dark;--bg:#fff;--fg:#111;--mut:#666;--line:#e5e5e5;--card:#fafafa}
+@media(prefers-color-scheme:dark){:root{--bg:#111;--fg:#eee;--mut:#999;--line:#2a2a2a;--card:#1a1a1a}}
+body{background:var(--bg);color:var(--fg);font:14px/1.55 ui-sans-serif,system-ui,sans-serif;margin:0;padding:2rem;max-width:60rem;margin-inline:auto}
+h1{font-size:1.4rem;margin:0 0 .25rem}h2{font-size:1.05rem;margin:2rem 0 .75rem;padding-bottom:.3rem;border-bottom:1px solid var(--line)}
+.meta,.mut{color:var(--mut);font-size:.85rem}
+.meta{margin-bottom:1rem}
+table{width:100%;border-collapse:collapse;font-size:.88rem}th,td{text-align:left;padding:.45rem .6rem;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--mut);font-weight:600;font-size:.78rem;text-transform:uppercase;letter-spacing:.04em}
+.bar{background:var(--line);border-radius:3px;height:7px;width:90px;overflow:hidden;display:inline-block;vertical-align:middle}
+.bar span{display:block;height:100%}
+code{background:var(--card);padding:.1rem .3rem;border-radius:3px;font-size:.85em}
+.fail{color:#c0392b}.ok{color:#1e8449}.warn{color:#b7791f}
+.thin{color:#b7791f;font-size:.78rem;white-space:nowrap}
+.banner{border-left:4px solid #b7791f;background:var(--card);padding:.7rem .9rem;margin:1rem 0;font-size:.86rem}
+.banner.stop{border-left-color:#c0392b}
+.banner b{display:block;margin-bottom:.2rem}
+.legend{background:var(--card);padding:.7rem .9rem;margin:.6rem 0 1rem;font-size:.85rem;border-radius:4px}
+.legend dt{font-weight:600;margin-top:.4rem}.legend dd{margin:0;color:var(--mut)}
+.derived{color:var(--mut);font-weight:400}
+details{margin:.3rem 0}summary{cursor:pointer;color:var(--mut)}
+.g{font-size:.83rem;padding:.15rem 0 .15rem 1rem;border-left:2px solid var(--line);margin:.2rem 0}
+</style>
+<h1>examples — a skill directory</h1>
+<div class="meta">2026-09-10T14:02:11.000Z &middot; harness <code>claude</code> &middot; model <code>harness default</code> &middot; judge <code>harness default</code> &middot; layers trigger, functional, ablation</div>
+
+
+
+
+
+<h2>Trigger &mdash; routing accuracy</h2><table><tr><th>Subject</th><th>Runs</th><th>Accuracy</th><th>Precision</th><th>Recall</th><th>Misroutes</th></tr>
+<tr><td><code>changelog</code></td><td><span class="mut">runs 3</span></td><td><div class="bar"><span style="width:83%;background:hsl(100 65% 45%)"></span></div> 83%</td><td>100%</td><td>67%</td>
+<td><div class="g fail">missed: write release notes from the commits since the last tag <span class="mut">[nny]</span></div><div class="g warn">flipped between runs: write release notes from the commits since the last tag <span class="mut">[nny]</span></div><div class="g warn">flipped between runs: add the recent fixes to CHANGELOG.md <span class="mut">[yyn]</span></div></td></tr>
+</table>
+
+<h2>Functional &mdash; artifact quality</h2><table><tr><th>Subject</th><th>Score</th><th>Cases</th></tr>
+<tr><td><code>changelog</code><div class="meta">repo</div></td><td><div class="bar"><span style="width:94%;background:hsl(113 65% 45%)"></span></div> 94%</td>
+<td><details><summary><span class="ok">PASS</span> unreleased-from-commits &mdash; 100% <span class="mut">runs 3</span></summary>
+<div class="g ok">v <code>file_exists</code> CHANGELOG.md<div class="meta">found CHANGELOG.md</div></div><div class="g ok">v <code>file_matches</code> CHANGELOG.md<div class="meta">CHANGELOG.md matches</div></div><div class="g ok">v <code>file_matches</code> CHANGELOG.md<div class="meta">CHANGELOG.md matches</div></div><div class="g ok">v <code>file_matches</code> CHANGELOG.md<div class="meta">CHANGELOG.md matches</div></div><div class="g ok">v <code>command</code> grep -c 'bump' CHANGELOG.md<div class="meta">output matches (exit 1)</div></div><div class="g ok">v <code>command</code> git rev-list --count HEAD<div class="meta">output matches</div></div><div class="g ok">v <code>llm</code> Every bullet under Unreleased describes one commit from the history in the imperative mood and carries no &quot;feat:&quot; / &quot;fix:&quot; prefix.<div class="meta">PASS: three bullets, each maps to a commit, no type prefixes</div></div><div class="g ok">v <code>tool_used</code> Skill<div class="meta">Skill changelog invoked</div></div>
+</details><details open><summary><span class="fail">FAIL</span> keeps-released-sections &mdash; 89% <span class="mut">runs 3</span></summary>
+<div class="g ok">v <code>file_matches</code> CHANGELOG.md<div class="meta">CHANGELOG.md matches</div></div><div class="g ok">v <code>file_matches</code> CHANGELOG.md<div class="meta">CHANGELOG.md matches</div></div><div class="g fail">x <code>command</code> grep -m1 '^## ' CHANGELOG.md<div class="meta">output does not match /Unreleased/: ## [1.1.0] - 2026-08-20</div></div><div class="g ok">v <code>command</code> grep -c 'chunk size' CHANGELOG.md<div class="meta">output matches (exit 1)</div></div><div class="g ok">v <code>command</code> git rev-list --count HEAD<div class="meta">output matches</div></div><div class="g ok">v <code>llm</code> The bullet about the empty file is under Unreleased, and the 1.1.0 section is unchanged.<div class="meta">PASS: the 1.1.0 section is byte-identical; the new bullet sits under Unreleased</div></div><div class="g ok">v <code>tool_used</code> Skill<div class="meta">Skill changelog invoked</div></div>
+</details></td></tr>
+</table>
+
+<h2>Ablation &mdash; does the subject earn its tokens?</h2>
+<div class="legend">
+<b>How to read this table.</b> <em>With</em> and <em>without</em> are the primary numbers; the delta is <span class="derived">derived</span> from them and must never be read on its own.
+<dl>
+<dt>With &mdash; the only arm your edit moves.</dt><dd>Compare it against the same cell in your previous run. This is where a real change shows up.</dd>
+<dt>Without &mdash; the base model, and it drifts.</dt><dd>It moves between runs for reasons that have nothing to do with your edit. A delta that changed sign usually means <em>this</em> arm moved: a subject going from 100/80 = +20% to 100/100 = &plusmn;0% while its with-arm never budged is not a regression.</dd>
+<dt>Delta &mdash; derived, and ambiguous by construction.</dt><dd>Before calling a delta change a regression or a win, look at which arm actually moved.</dd>
+</dl>
+<b>Per-criterion truth table.</b> pass/pass = deletion candidate &middot; pass/fail = what the subject is buying you &middot; fail/pass = the subject is in the way &middot; fail/fail = a genuine gap.
+</div>
+<table><tr><th>Subject</th><th>Case</th><th>Runs</th><th>With<br><span class="mut">primary</span></th><th>Without<br><span class="mut">baseline, drifts</span></th><th>Delta<br><span class="derived">derived</span></th><th>Reading</th><th>Deletion candidates</th></tr>
+<tr><td><code>changelog</code></td><td>unreleased-from-commits</td><td><span class="mut">runs 3</span></td><td><div class="bar"><span style="width:100%;background:hsl(120 65% 45%)"></span></div> <b>100%</b></td><td><div class="bar"><span style="width:57%;background:hsl(69 65% 45%)"></span></div> 57%</td>
+<td class="ok">+43%</td>
+<td><code>pass/fail</code><div class="meta">what the subject is buying you — protect it with a free invariant</div></td>
+<td><div class="g warn">CHANGELOG.md</div><div class="g warn">git rev-list --count HEAD</div></td></tr><tr><td><code>changelog</code></td><td>keeps-released-sections</td><td><span class="mut">runs 3</span></td><td><div class="bar"><span style="width:89%;background:hsl(107 65% 45%)"></span></div> <b>89%</b></td><td><div class="bar"><span style="width:33%;background:hsl(40 65% 45%)"></span></div> 33%</td>
+<td class="ok">+56%</td>
+<td><code>pass/fail</code><div class="meta">what the subject is buying you — protect it with a free invariant</div></td>
+<td><div class="g warn">git rev-list --count HEAD</div></td></tr>
+</table>
+
+<h2>Cost &amp; time</h2>
+<table><tr><th>What</th><th>Volume</th><th>Cost</th><th>Time</th></tr>
+<tr><td>Agent runs <span class="mut">(functional / ablation)</span></td><td>12 run(s) over 2 case(s)</td><td>$0.8094</td><td>6m 53s <span class="mut">(sums parallel work)</span></td></tr>
+<tr><td>Trigger classifications</td><td>18 call(s)</td><td><span class="mut">not reported by the harness</span></td><td>51s</td></tr>
+<tr><td>Wall clock</td><td></td><td></td><td>9m 37s</td></tr>
+</table>

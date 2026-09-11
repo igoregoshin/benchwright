@@ -1,0 +1,8 @@
+[
+  { "query": "update the changelog for the next release", "should_trigger": true },
+  { "query": "write release notes from the commits since the last tag", "should_trigger": true },
+  { "query": "add the recent fixes to CHANGELOG.md", "should_trigger": true },
+  { "query": "commit these changes with a good message", "should_trigger": false },
+  { "query": "bump the version in package.json", "should_trigger": false },
+  { "query": "summarize this pull request for the reviewer", "should_trigger": false }
+]

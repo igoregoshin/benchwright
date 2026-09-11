@@ -1,0 +1,27 @@
+{
+  "title": "examples — a rules file as the subject",
+  "root": ".",
+  "defaults": {
+    "runs": 3,
+    "concurrency": 1,
+    "secretsFile": ".bench-secrets"
+  },
+  "categories": {
+    "diff": { "fixture": "git repository with a staged change" }
+  },
+  "subjects": [
+    {
+      "id": "agents-md",
+      "category": "diff",
+      "description": null,
+      "layers": ["functional", "ablation"],
+      "install": {
+        "copy": [
+          { "from": "AGENTS.md", "to": "AGENTS.md" },
+          { "from": "AGENTS.md", "to": "CLAUDE.md" }
+        ]
+      },
+      "casesFile": "bench/agents-md.yaml"
+    }
+  ]
+}

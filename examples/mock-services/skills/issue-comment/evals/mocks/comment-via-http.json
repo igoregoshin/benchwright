@@ -1,0 +1,21 @@
+{
+  "http": {
+    "secrets": {
+      "TRACKER_BASE_URL": "{{baseUrl}}",
+      "TRACKER_TOKEN": "bench-token"
+    },
+    "routes": [
+      {
+        "method": "GET",
+        "path": "/api/issues/PRJ-7",
+        "json": { "key": "PRJ-7", "title": "Retry failed uploads", "status": "In progress" }
+      },
+      {
+        "method": "POST",
+        "path": "/api/issues/PRJ-7/comments",
+        "status": 201,
+        "json": { "id": 501, "url": "https://tracker.example.test/PRJ-7#comment-501" }
+      }
+    ]
+  }
+}

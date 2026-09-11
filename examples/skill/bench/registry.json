@@ -1,0 +1,9 @@
+{
+  "categories": {
+    "repo": { "skills": ["changelog"] }
+  },
+  "exempt": {
+    "brainstorm": "an open-ended conversation with the user; headless there is nothing deterministic to grade"
+  },
+  "overrides": {}
+}

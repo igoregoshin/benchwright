@@ -1,0 +1,21 @@
+{
+  "mcp": {
+    "tracker": {
+      "get_issue": {
+        "description": "Fetch one issue by its key",
+        "params": { "issue": "string" },
+        "required": ["issue"],
+        "responses": [
+          { "when": { "issue": "PRJ-7" }, "result": { "key": "PRJ-7", "title": "Retry failed uploads", "status": "In progress" } },
+          { "error": "no such issue" }
+        ]
+      },
+      "add_comment": {
+        "description": "Add a comment to an issue",
+        "params": { "issue": "string", "body": "string" },
+        "required": ["issue", "body"],
+        "result": { "id": 501, "url": "https://tracker.example.test/PRJ-7#comment-501" }
+      }
+    }
+  }
+}

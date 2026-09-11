@@ -1,0 +1,109 @@
+# Functional cases for `issue-comment`. Category `mcp` means: a git repository
+# plus the recorded service the case names in `fixture.mocks`. The recordings
+# live in `evals/mocks/` and are shared by both ablation arms, so a delta can
+# only come from the skill.
+#
+# "mcp" is a shorthand for "external service", not a transport. Two transports
+# exist and a case builds the one its subject really uses:
+#
+#   MCP over stdio  — the agent calls `mcp__tracker__<tool>`; the harness's own
+#                     MCP config in the workspace points `tracker` at the mock server.
+#   HTTP            — the skill's script reads a base URL from `.env`; the mock
+#                     listens on localhost and the runner writes `.env` for it.
+#
+# Both log every call to `.bench/mock-calls.jsonl`, and `.bench/calls.mjs` is
+# the query helper the command graders below use.
+skill: issue-comment
+category: mcp
+
+cases:
+  - id: comment-via-mcp
+    prompt: post a progress update on PRJ-7
+    fixture:
+      mocks: comment-via-mcp.json
+      files:
+        - path: README.md
+          content: "# uploader\n"
+      # `commits[].branch` puts the commits ON that branch; `fixture.branch`
+      # alone would check out only after everything is committed, and
+      # `git log main..HEAD` would then be empty.
+      commits:
+        - branch: feature/retry-uploads
+          message: "feat: retry a failed upload three times"
+          files:
+            - path: src/upload.js
+              content: "export async function upload(file, attempts = 3) {}\n"
+        - branch: feature/retry-uploads
+          message: "fix: back off between retries"
+          files:
+            - path: src/upload.js
+              content: "export async function upload(file, attempts = 3) { /* backoff */ }\n"
+    graders:
+      # Exactly one comment was posted — not zero, not one per commit.
+      - type: command
+        run: node .bench/calls.mjs count mcp:tracker:add_comment
+        expect_match: '^1$'
+      - type: command
+        run: node .bench/calls.mjs arg mcp:tracker:add_comment issue
+        expect_match: '^PRJ-7$'
+      # `arg` prints the body raw, so grep can count bullets: one per commit.
+      - type: command
+        run: node .bench/calls.mjs arg mcp:tracker:add_comment body | grep -c '^- '
+        expect_match: '^2$'
+      # Exit 1 if any call reached the mock that no recording answered.
+      - type: command
+        run: node .bench/calls.mjs unmatched
+      # Tool names are canonical on every harness, so this grader reads the
+      # same whether the CLI reported `mcp__tracker__add_comment` or
+      # `tracker_add_comment`.
+      - type: tool_used
+        tool: mcp__tracker__add_comment
+      # The strict form of "do not touch the repository".
+      - type: no_writes
+      - type: llm
+        criterion: The final answer says the comment was posted and names the comment id the tracker returned (501).
+      - type: tool_used
+        tool: Skill
+        skill: issue-comment
+        with_only: true
+
+  - id: comment-via-http
+    prompt: post a progress update on PRJ-7
+    fixture:
+      mocks: comment-via-http.json
+      files:
+        - path: README.md
+          content: "# uploader\n"
+      commits:
+        - branch: feature/retry-uploads
+          message: "feat: retry a failed upload three times"
+          files:
+            - path: src/upload.js
+              content: "export async function upload(file, attempts = 3) {}\n"
+        - branch: feature/retry-uploads
+          message: "fix: back off between retries"
+          files:
+            - path: src/upload.js
+              content: "export async function upload(file, attempts = 3) { /* backoff */ }\n"
+    graders:
+      # `:201` additionally requires the mock's response status.
+      - type: command
+        run: node .bench/calls.mjs count http:POST:/api/issues/PRJ-7/comments:201
+        expect_match: '^1$'
+      - type: command
+        run: node .bench/calls.mjs arg http:POST:/api/issues/PRJ-7/comments body | grep -c '^- '
+        expect_match: '^2$'
+      - type: command
+        run: node .bench/calls.mjs unmatched
+      # The script may be driven through a temp file, so `no_writes` would be
+      # too strict here; "the repository is untouched" is what matters.
+      # `.env` and `.bench/` are hidden from git, so they do not show up.
+      - type: command
+        run: git status --porcelain
+        expect_match: '^$'
+      - type: llm
+        criterion: The final answer says the comment was posted and names the comment id the tracker returned (501).
+      - type: tool_used
+        tool: Skill
+        skill: issue-comment
+        with_only: true

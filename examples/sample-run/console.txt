@@ -1,0 +1,38 @@
+-- trigger (routing) --
+  changelog                      acc 83%  P 100%  R 67%  runs 3
+      x missed "write release notes from the commits since the last tag" [nny]
+      ~ flipped between runs "write release notes from the commits since the last tag" [nny]
+      ~ flipped between runs "add the recent fixes to CHANGELOG.md" [yyn]
+
+-- functional --
+  changelog                      94%  2 case(s)
+    v unreleased-from-commits  100%  runs 3
+    x keeps-released-sections  89%  runs 3
+        x [command] grep -m1 '^## ' CHANGELOG.md
+          output does not match /Unreleased/: ## [1.1.0] - 2026-08-20
+
+-- ablation (with subject vs without) --
+  Read the two arms first; the delta is derived from them, not the other way round.
+  with    - the only arm your edit moves. Compare it with the same cell in the previous run.
+  without - the base model. It drifts on its own; when the delta changes, check WHICH arm
+            moved before calling it a regression.
+  pass/pass = deletion candidate | pass/fail = what the subject buys you |
+  fail/pass = the subject is in the way | fail/fail = a genuine gap.
+
+  changelog / unreleased-from-commits  runs 3
+      with     100%    primary  - moves only when the subject changes
+      without  57%     baseline - drifts on its own between runs
+      delta    +43%    derived  - pass/fail: what the subject is buying you — protect it with a free invariant
+      ! passes without the subject too: CHANGELOG.md
+      ! passes without the subject too: git rev-list --count HEAD
+
+  changelog / keeps-released-sections  runs 3
+      with     89%     primary  - moves only when the subject changes
+      without  33%     baseline - drifts on its own between runs
+      delta    +56%    derived  - pass/fail: what the subject is buying you — protect it with a free invariant
+      ! passes without the subject too: git rev-list --count HEAD
+
+-- cost & time --
+  agent runs        12 run(s) over 2 case(s)   $0.8094   agent time 6m 53s (sums parallel work)
+  trigger calls     18 classification call(s)   classifier time 51s   cost not reported by the harness
+  wall clock      9m 37s

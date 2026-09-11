@@ -16,4 +16,4 @@ See the top of [`../README.md`](../README.md): plain ESM JavaScript on Node, no 
 
 ## Where the user-facing knowledge lives
 
-The **README** at the repository root is the reference for users: requirements, config discovery, the subject model, the case and fixture formats, the graders, every trap the runner was built around. The documents here do not repeat it; they explain how the code is organised and how to change it safely.
+The **README** at the repository root is the reference for users: requirements, config discovery, the subject model, the case and fixture formats, the graders, every trap the runner was built around. [`../examples/`](../examples/) holds complete, commented setups and an annotated sample run; `test/examples.test.mjs` keeps them in step with the code. The documents here do not repeat either; they explain how the code is organised and how to change it safely.

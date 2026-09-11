@@ -1,0 +1,459 @@
+{
+  "title": "examples — a skill directory",
+  "startedAt": "2026-09-10T14:02:11.000Z",
+  "finishedAt": "2026-09-10T14:11:48.000Z",
+  "complete": true,
+  "layers": [
+    "trigger",
+    "functional",
+    "ablation"
+  ],
+  "harness": "claude",
+  "model": null,
+  "judgeModel": null,
+  "subjects": [
+    "changelog"
+  ],
+  "trigger": [
+    {
+      "subject": "changelog",
+      "category": "repo",
+      "total": 6,
+      "runs": 3,
+      "accuracy": 0.8333333333333334,
+      "precision": 1,
+      "recall": 0.6666666666666666,
+      "misses": [
+        {
+          "query": "write release notes from the commits since the last tag",
+          "expected": true,
+          "actuals": [
+            false,
+            false,
+            true
+          ]
+        }
+      ],
+      "unstable": [
+        {
+          "query": "write release notes from the commits since the last tag",
+          "actuals": [
+            false,
+            false,
+            true
+          ]
+        },
+        {
+          "query": "add the recent fixes to CHANGELOG.md",
+          "actuals": [
+            true,
+            true,
+            false
+          ]
+        }
+      ],
+      "calls": 18,
+      "classifierMs": 50895
+    }
+  ],
+  "functional": [
+    {
+      "subject": "changelog",
+      "category": "repo",
+      "cases": [
+        {
+          "kind": "case",
+          "subject": "changelog",
+          "category": "repo",
+          "sections": [
+            "functional",
+            "ablation"
+          ],
+          "id": "unreleased-from-commits",
+          "source": "bench.yaml",
+          "score": 1,
+          "graders": [
+            {
+              "id": "g1",
+              "type": "file_exists",
+              "weight": 1,
+              "withOnly": false,
+              "label": "CHANGELOG.md",
+              "pass": true,
+              "why": "found CHANGELOG.md"
+            },
+            {
+              "id": "g2",
+              "type": "file_matches",
+              "weight": 1,
+              "withOnly": false,
+              "label": "CHANGELOG.md",
+              "pass": true,
+              "why": "CHANGELOG.md matches"
+            },
+            {
+              "id": "g3",
+              "type": "file_matches",
+              "weight": 1,
+              "withOnly": false,
+              "label": "CHANGELOG.md",
+              "pass": true,
+              "why": "CHANGELOG.md matches"
+            },
+            {
+              "id": "g4",
+              "type": "file_matches",
+              "weight": 1,
+              "withOnly": false,
+              "label": "CHANGELOG.md",
+              "pass": true,
+              "why": "CHANGELOG.md matches"
+            },
+            {
+              "id": "g5",
+              "type": "command",
+              "weight": 1,
+              "withOnly": false,
+              "label": "grep -c 'bump' CHANGELOG.md",
+              "pass": true,
+              "why": "output matches (exit 1)"
+            },
+            {
+              "id": "g6",
+              "type": "command",
+              "weight": 1,
+              "withOnly": false,
+              "label": "git rev-list --count HEAD",
+              "pass": true,
+              "why": "output matches"
+            },
+            {
+              "id": "g7",
+              "type": "llm",
+              "weight": 1,
+              "withOnly": false,
+              "label": "Every bullet under Unreleased describes one commit from the history in the imperative mood and carries no \"feat:\" / \"fix:\" prefix.",
+              "pass": true,
+              "why": "PASS: three bullets, each maps to a commit, no type prefixes"
+            },
+            {
+              "id": "g8",
+              "type": "tool_used",
+              "weight": 1,
+              "withOnly": true,
+              "label": "Skill",
+              "pass": true,
+              "why": "Skill changelog invoked"
+            }
+          ],
+          "runs": 3,
+          "agentRuns": 6,
+          "costUsd": 0.4173,
+          "durationMs": 214800,
+          "withScore": 1,
+          "withoutScore": 0.5714,
+          "delta": 0.4286,
+          "deletionCandidates": [
+            "CHANGELOG.md",
+            "git rev-list --count HEAD"
+          ]
+        },
+        {
+          "kind": "case",
+          "subject": "changelog",
+          "category": "repo",
+          "sections": [
+            "functional",
+            "ablation"
+          ],
+          "id": "keeps-released-sections",
+          "source": "bench.yaml",
+          "score": 0.8889,
+          "graders": [
+            {
+              "id": "g1",
+              "type": "file_matches",
+              "weight": 1,
+              "withOnly": false,
+              "label": "CHANGELOG.md",
+              "pass": true,
+              "why": "CHANGELOG.md matches"
+            },
+            {
+              "id": "g2",
+              "type": "file_matches",
+              "weight": 1,
+              "withOnly": false,
+              "label": "CHANGELOG.md",
+              "pass": true,
+              "why": "CHANGELOG.md matches"
+            },
+            {
+              "id": "g3",
+              "type": "command",
+              "weight": 1,
+              "withOnly": false,
+              "label": "grep -m1 '^## ' CHANGELOG.md",
+              "pass": false,
+              "why": "output does not match /Unreleased/: ## [1.1.0] - 2026-08-20"
+            },
+            {
+              "id": "g4",
+              "type": "command",
+              "weight": 1,
+              "withOnly": false,
+              "label": "grep -c 'chunk size' CHANGELOG.md",
+              "pass": true,
+              "why": "output matches (exit 1)"
+            },
+            {
+              "id": "g5",
+              "type": "command",
+              "weight": 1,
+              "withOnly": false,
+              "label": "git rev-list --count HEAD",
+              "pass": true,
+              "why": "output matches"
+            },
+            {
+              "id": "g6",
+              "type": "llm",
+              "weight": 1,
+              "withOnly": false,
+              "label": "The bullet about the empty file is under Unreleased, and the 1.1.0 section is unchanged.",
+              "pass": true,
+              "why": "PASS: the 1.1.0 section is byte-identical; the new bullet sits under Unreleased"
+            },
+            {
+              "id": "g7",
+              "type": "tool_used",
+              "weight": 1,
+              "withOnly": true,
+              "label": "Skill",
+              "pass": true,
+              "why": "Skill changelog invoked"
+            }
+          ],
+          "runs": 3,
+          "agentRuns": 6,
+          "costUsd": 0.3921,
+          "durationMs": 198400,
+          "withScore": 0.8889,
+          "withoutScore": 0.3333,
+          "delta": 0.5556,
+          "deletionCandidates": [
+            "git rev-list --count HEAD"
+          ]
+        }
+      ],
+      "score": 0.94445,
+      "runs": 3
+    }
+  ],
+  "ablation": [
+    {
+      "subject": "changelog",
+      "category": "repo",
+      "cases": [
+        {
+          "kind": "case",
+          "subject": "changelog",
+          "category": "repo",
+          "sections": [
+            "functional",
+            "ablation"
+          ],
+          "id": "unreleased-from-commits",
+          "source": "bench.yaml",
+          "score": 1,
+          "graders": [
+            {
+              "id": "g1",
+              "type": "file_exists",
+              "weight": 1,
+              "withOnly": false,
+              "label": "CHANGELOG.md",
+              "pass": true,
+              "why": "found CHANGELOG.md"
+            },
+            {
+              "id": "g2",
+              "type": "file_matches",
+              "weight": 1,
+              "withOnly": false,
+              "label": "CHANGELOG.md",
+              "pass": true,
+              "why": "CHANGELOG.md matches"
+            },
+            {
+              "id": "g3",
+              "type": "file_matches",
+              "weight": 1,
+              "withOnly": false,
+              "label": "CHANGELOG.md",
+              "pass": true,
+              "why": "CHANGELOG.md matches"
+            },
+            {
+              "id": "g4",
+              "type": "file_matches",
+              "weight": 1,
+              "withOnly": false,
+              "label": "CHANGELOG.md",
+              "pass": true,
+              "why": "CHANGELOG.md matches"
+            },
+            {
+              "id": "g5",
+              "type": "command",
+              "weight": 1,
+              "withOnly": false,
+              "label": "grep -c 'bump' CHANGELOG.md",
+              "pass": true,
+              "why": "output matches (exit 1)"
+            },
+            {
+              "id": "g6",
+              "type": "command",
+              "weight": 1,
+              "withOnly": false,
+              "label": "git rev-list --count HEAD",
+              "pass": true,
+              "why": "output matches"
+            },
+            {
+              "id": "g7",
+              "type": "llm",
+              "weight": 1,
+              "withOnly": false,
+              "label": "Every bullet under Unreleased describes one commit from the history in the imperative mood and carries no \"feat:\" / \"fix:\" prefix.",
+              "pass": true,
+              "why": "PASS: three bullets, each maps to a commit, no type prefixes"
+            },
+            {
+              "id": "g8",
+              "type": "tool_used",
+              "weight": 1,
+              "withOnly": true,
+              "label": "Skill",
+              "pass": true,
+              "why": "Skill changelog invoked"
+            }
+          ],
+          "runs": 3,
+          "agentRuns": 6,
+          "costUsd": 0.4173,
+          "durationMs": 214800,
+          "withScore": 1,
+          "withoutScore": 0.5714,
+          "delta": 0.4286,
+          "deletionCandidates": [
+            "CHANGELOG.md",
+            "git rev-list --count HEAD"
+          ]
+        },
+        {
+          "kind": "case",
+          "subject": "changelog",
+          "category": "repo",
+          "sections": [
+            "functional",
+            "ablation"
+          ],
+          "id": "keeps-released-sections",
+          "source": "bench.yaml",
+          "score": 0.8889,
+          "graders": [
+            {
+              "id": "g1",
+              "type": "file_matches",
+              "weight": 1,
+              "withOnly": false,
+              "label": "CHANGELOG.md",
+              "pass": true,
+              "why": "CHANGELOG.md matches"
+            },
+            {
+              "id": "g2",
+              "type": "file_matches",
+              "weight": 1,
+              "withOnly": false,
+              "label": "CHANGELOG.md",
+              "pass": true,
+              "why": "CHANGELOG.md matches"
+            },
+            {
+              "id": "g3",
+              "type": "command",
+              "weight": 1,
+              "withOnly": false,
+              "label": "grep -m1 '^## ' CHANGELOG.md",
+              "pass": false,
+              "why": "output does not match /Unreleased/: ## [1.1.0] - 2026-08-20"
+            },
+            {
+              "id": "g4",
+              "type": "command",
+              "weight": 1,
+              "withOnly": false,
+              "label": "grep -c 'chunk size' CHANGELOG.md",
+              "pass": true,
+              "why": "output matches (exit 1)"
+            },
+            {
+              "id": "g5",
+              "type": "command",
+              "weight": 1,
+              "withOnly": false,
+              "label": "git rev-list --count HEAD",
+              "pass": true,
+              "why": "output matches"
+            },
+            {
+              "id": "g6",
+              "type": "llm",
+              "weight": 1,
+              "withOnly": false,
+              "label": "The bullet about the empty file is under Unreleased, and the 1.1.0 section is unchanged.",
+              "pass": true,
+              "why": "PASS: the 1.1.0 section is byte-identical; the new bullet sits under Unreleased"
+            },
+            {
+              "id": "g7",
+              "type": "tool_used",
+              "weight": 1,
+              "withOnly": true,
+              "label": "Skill",
+              "pass": true,
+              "why": "Skill changelog invoked"
+            }
+          ],
+          "runs": 3,
+          "agentRuns": 6,
+          "costUsd": 0.3921,
+          "durationMs": 198400,
+          "withScore": 0.8889,
+          "withoutScore": 0.3333,
+          "delta": 0.5556,
+          "deletionCandidates": [
+            "git rev-list --count HEAD"
+          ]
+        }
+      ],
+      "score": 0.94445,
+      "runs": 3
+    }
+  ],
+  "totals": {
+    "costUsd": 0.8094,
+    "costReported": true,
+    "agentRuns": 12,
+    "cases": 2,
+    "agentDurationMs": 413200,
+    "triggerCalls": 18,
+    "triggerClassifierMs": 50895,
+    "triggerCostReported": false,
+    "wallDurationMs": 577000,
+    "resumes": 0
+  }
+}
