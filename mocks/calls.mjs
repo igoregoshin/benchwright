@@ -39,8 +39,8 @@ import { fileURLToPath } from 'node:url';
 
 // fileURLToPath, not a hand-rolled strip of the leading slash: the workspace
 // path runs through os.tmpdir(), which on Windows hands back the 8.3 short name
-// (`C:\Users\IGOR~1.EGO\…`), and `import.meta.url` percent-encodes the `~`. The
-// naive version looked for `mock-calls.jsonl` under `IGOR%7E1.EGO` and reported
+// (`C:\Users\SOMEUS~1.NAM\…`), and `import.meta.url` percent-encodes the `~`. The
+// naive version looked for `mock-calls.jsonl` under `SOMEUS%7E1.NAM` and reported
 // "the mocks were never called" for a run in which every call had landed.
 const LOG =
   process.env.BENCHWRIGHT_CALL_LOG ??

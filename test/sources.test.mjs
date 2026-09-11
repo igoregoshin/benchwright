@@ -11,7 +11,7 @@ function sources(dir) {
     if (e.name === 'node_modules' || e.name === '.git' || e.name === 'bench-results') return [];
     const full = path.join(dir, e.name);
     if (e.isDirectory()) return sources(full);
-    return /\.(mjs|js|json|md|ts)$/.test(e.name) ? [full] : [];
+    return /\.(mjs|js|json|jsonl|md|ts|yml|yaml)$/.test(e.name) ? [full] : [];
   });
 }
 
