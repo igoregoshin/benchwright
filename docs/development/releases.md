@@ -2,15 +2,15 @@
 
 ## Versioning
 
-SemVer. The public surface that decides the bump is the list under "Contracts a consumer depends on" in [`../architecture/constraints.md`](../architecture/constraints.md):
+SemVer, decided by the change's effect on a consumer's existing cases and config — not by the size of the diff. The public surface is the list under "Contracts a consumer depends on" in [`../architecture/constraints.md`](../architecture/constraints.md).
 
-- **major** — a case, config, CLI, result-file or grader-semantics change that can make an existing consumer's cases parse differently or grade differently;
-- **minor** — a new grader type, category, flag, config field or exported function that leaves existing behaviour intact;
-- **patch** — a fix with no contract change.
+| Bump | When |
+|---|---|
+| **major** | An existing consumer's cases could parse differently or *grade differently* after upgrading: a case / config / CLI / result-file contract changed, a grader's fields or semantics changed, a default that can flip a verdict moved, an environment variable was renamed, an export was removed, a config field became required. |
+| **minor** | Something new that leaves every existing case and config behaving exactly as before: a grader type, a category, a flag, a config field with a default, an export, a fixture option. "Old behaviour still available via X" is minor. |
+| **patch** | A fix with no contract change: the code now does what the README already said. |
 
-Before `1.0.0` a breaking change still bumps the minor version, and the release notes say so in the first line.
-
-The bump rule an agent applies to every change is in the root [`AGENTS.md`](../../AGENTS.md) → Versioning; this page is the mechanics.
+Two rules of thumb: a bugfix that *changes verdicts* is major, not patch — say so in the release notes, because consumers' historical numbers were wrong; and before `1.0.0` a breaking change bumps the minor version, with the release notes saying so in the first line. The bump lands in `package.json` in the same PR as the change.
 
 ## Process
 
