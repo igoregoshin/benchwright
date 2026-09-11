@@ -1,10 +1,10 @@
 # benchwright
 
-Benchmark what you hand an agent — a skill, a rules file, a prompt fragment, an MCP wiring — **with it and without it**, through headless `claude -p` runs.
+Benchmark what you hand an agent — a skill, a rules file, a prompt fragment, an MCP wiring — **with it and without it**, through headless runs of a real agent CLI.
 
 `npm test` proves the *text* of a skill survived an edit. benchwright proves the *behaviour* did: does the agent produce the right artifact, is it routed to for the right requests, and does the text earn its tokens over the base model.
 
-**Tech stack:** plain ESM JavaScript, Node ≥ 20.11, no build step, one runtime dependency (`js-yaml`), tests on `node:test`. Requires the Claude Code CLI on `PATH` and `git`.
+**Tech stack:** plain ESM JavaScript, Node ≥ 20.11, no build step, one runtime dependency (`js-yaml`), tests on `node:test`. Requires an agent CLI on `PATH` (see Harness) and `git`.
 
 ```bash
 npx benchwright --list                                              # what is registered, with case ids
@@ -21,10 +21,21 @@ npx benchwright --resume                                            # continue a
 ## Requirements
 
 - Node ≥ 20.11.
-- **Claude Code CLI on PATH.** The runner never calls an API itself: it spawns `claude -p` for the agent, the judge and the trigger classifier, so a run uses whatever authorization your CLI already has. No API key is read anywhere. Swap the binary with `BENCHWRIGHT_CLAUDE=/path/to/claude`.
+- **An agent CLI on PATH.** The runner never calls a model API itself: it spawns the CLI for the agent, the judge and the trigger classifier, so a run uses whatever authorization your CLI already has. No API key is read anywhere. See *Harness* below for what is supported today.
 - `git` (fixtures are git repositories) and, on Windows, Git Bash (command graders run under POSIX `sh`; override with `BENCHWRIGHT_SHELL`).
 
-Check `claude --version` before concluding a run is impossible — environment variables have nothing to do with it.
+Check that the CLI answers `--version` before concluding a run is impossible — environment variables have nothing to do with it.
+
+## Harness
+
+Everything that knows how to drive a particular agent CLI lives in one module, `lib/agent.mjs`: the command line, the event stream it parses (which tools fired, which skills loaded, the cost), the judge and classifier prompts. The fixture builder adds the two harness-specific bits of a workspace — where a skill is installed and how mock MCP servers are declared.
+
+| Harness | Status |
+|---|---|
+| **Claude Code** (`claude -p`) | Supported. Binary override: `BENCHWRIGHT_CLAUDE`. Skills install to `.claude/skills/`, mocks are declared in `.mcp.json`. |
+| OpenCode, Codex CLI and others | Not yet: an adapter in `lib/agent.mjs` plus the two workspace conventions above. The rest of the runner — subjects, fixtures, graders, mocks, reports — is harness-agnostic by design. |
+
+The case format, the graders and the results do not depend on the harness, so cases written today carry over unchanged when an adapter lands.
 
 ## Install
 

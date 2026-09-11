@@ -1,7 +1,7 @@
 {
   "name": "benchwright",
-  "version": "0.1.0",
-  "description": "Benchmark anything an agent loads — skills, rules, prompts, MCP wiring — through headless claude -p runs: trigger / functional / ablation layers, deterministic graders, mock services, resumable reports.",
+  "version": "1.0.0",
+  "description": "Benchmark anything an agent loads — skills, rules, prompts, MCP wiring — through headless agent-CLI runs: trigger / functional / ablation layers, deterministic graders, mock services, resumable reports.",
   "author": "Igor Egoshin",
   "license": "MIT",
   "repository": {
@@ -42,8 +42,9 @@
     "eval",
     "agent",
     "skills",
-    "claude",
-    "ablation"
+    "ablation",
+    "claude-code",
+    "agent-skills"
   ],
   "dependencies": {
     "js-yaml": "^4.1.0"
