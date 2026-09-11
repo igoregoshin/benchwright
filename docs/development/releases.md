@@ -10,13 +10,18 @@ SemVer. The public surface that decides the bump is the list under "Contracts a 
 
 Before `1.0.0` a breaking change still bumps the minor version, and the release notes say so in the first line.
 
+The bump rule an agent applies to every change is in the root [`AGENTS.md`](../../AGENTS.md) → Versioning; this page is the mechanics.
+
 ## Process
 
-1. `npm test` green on the machine that publishes (it must be a Windows or POSIX box with `git` and a shell; nothing else is required).
-2. Bump `version` in `package.json`; write the release notes from the merged PRs, contract changes first.
-3. Commit as `chore(release): vX.Y.Z`, tag `vX.Y.Z`, push the tag.
-4. `npm publish`. The package ships the working copy: check that the working tree is clean and LF (`.gitattributes` enforces it) so the bin's shebang survives.
-5. Smoke the published package from a scratch project: `npx benchwright --help`, then `--check` against a minimal config.
+Publishing is done by GitHub Actions (`.github/workflows/npm-publish.yml`), never from a developer machine.
+
+1. Bump `version` in `package.json` in the same PR as the change that requires it; `npm test` is green in CI (`.github/workflows/ci.yml`, Node 20 / 22 / 24).
+2. Merge to `main`. Write the release notes from the merged PRs, contract changes first.
+3. Create a GitHub release with tag `v<version>` (the `v` prefix is required). The workflow runs the tests again, **fails if the tag does not match `package.json`**, then runs `npm publish --provenance --access public`.
+4. Smoke the published package from a scratch project: `npx benchwright@<version> --help`, then `--check` against a minimal config.
+
+One-time setup: an npm automation token stored as the repository secret `NPM_TOKEN`. The package ships the working copy, so the checkout must be LF — `.gitattributes` enforces it and the bin's shebang survives.
 
 ## What ships
 
