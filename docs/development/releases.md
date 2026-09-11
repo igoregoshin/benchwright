@@ -18,7 +18,7 @@ Publishing is done by GitHub Actions (`.github/workflows/npm-publish.yml`), neve
 
 1. Bump `version` in `package.json` in the same PR as the change that requires it; `npm test` is green in CI (`.github/workflows/ci.yml`, Node 20 / 22 / 24).
 2. Merge to `main`. Write the release notes from the merged PRs, contract changes first.
-3. Create a GitHub release with tag `v<version>` (the `v` prefix is required). The workflow runs the tests again, **fails if the tag does not match `package.json`**, then runs `npm publish --provenance --access public`.
+3. Create a GitHub release with tag `v<version>` (the `v` prefix is required) and publish it — a draft does not trigger anything until it is published. The workflow runs the tests again, **fails if the tag does not match `package.json`**, then runs `npm publish --provenance --access public`.
 4. Smoke the published package from a scratch project: `npx benchwright@<version> --help`, then `--check` against a minimal config.
 
 One-time setup: an npm automation token stored as the repository secret `NPM_TOKEN`. The package ships the working copy, so the checkout must be LF — `.gitattributes` enforces it and the bin's shebang survives.

@@ -1,4 +1,4 @@
-# Publishes to npm when a GitHub release is created.
+# Publishes to npm when a GitHub release is published.
 #
 # Flow: bump `version` in package.json → merge → create a release with tag
 # `v<version>` → this workflow tests, checks that the tag matches the package
@@ -10,7 +10,7 @@ name: Publish to npm
 
 on:
   release:
-    types: [created]
+    types: [published]
 
 permissions:
   contents: read
