@@ -1,0 +1,54 @@
+{
+  "name": "benchwright",
+  "version": "0.1.0",
+  "description": "Benchmark anything an agent loads — skills, rules, prompts, MCP wiring — through headless claude -p runs: trigger / functional / ablation layers, deterministic graders, mock services, resumable reports.",
+  "author": "Igor Egoshin",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/igoregoshin/benchwright.git"
+  },
+  "homepage": "https://github.com/igoregoshin/benchwright#readme",
+  "bugs": {
+    "url": "https://github.com/igoregoshin/benchwright/issues"
+  },
+  "type": "module",
+  "bin": {
+    "benchwright": "./bin/benchwright.mjs"
+  },
+  "main": "./index.mjs",
+  "types": "./index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./index.d.ts",
+      "default": "./index.mjs"
+    },
+    "./package.json": "./package.json",
+    "./mocks/*": "./mocks/*"
+  },
+  "scripts": {
+    "test": "node --test test/*.test.mjs"
+  },
+  "files": [
+    "bin/",
+    "lib/",
+    "mocks/",
+    "index.mjs",
+    "index.d.ts",
+    "README.md"
+  ],
+  "keywords": [
+    "benchmark",
+    "eval",
+    "agent",
+    "skills",
+    "claude",
+    "ablation"
+  ],
+  "dependencies": {
+    "js-yaml": "^4.1.0"
+  },
+  "engines": {
+    "node": ">=20.11.0"
+  }
+}
